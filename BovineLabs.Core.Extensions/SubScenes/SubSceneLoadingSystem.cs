@@ -16,7 +16,7 @@ namespace BovineLabs.Core.SubScenes
 
     /// <summary> System that loads our SubScenes depending on the world and the SubScene load mode. </summary>
     [UpdateInGroup(typeof(AfterSceneSystemGroup), OrderFirst = true)]
-    [WorldSystemFilter(Worlds.SimulationService)]
+    [WorldSystemFilter(Worlds.SimulationService | Worlds.Menu)]
     public unsafe partial struct SubSceneLoadingSystem : ISystem, ISystemStartStop
     {
         private bool initialized;
@@ -35,6 +35,7 @@ namespace BovineLabs.Core.SubScenes
 #endif
         }
 
+        /// <inheritdoc/>
         [BurstCompile]
         public void OnStartRunning(ref SystemState state)
         {
@@ -45,6 +46,7 @@ namespace BovineLabs.Core.SubScenes
             }
         }
 
+        /// <inheritdoc/>
         public void OnStopRunning(ref SystemState state)
         {
         }

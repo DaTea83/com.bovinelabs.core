@@ -107,33 +107,33 @@ var settings = SystemAPI.GetSingleton<GameplayData>();
 
 **Global Singletons:**
 ```csharp
-var inputActions = ControlSettings.I.Asset;
+var bootstrap = GameBootstrapSettings.I.BootConfig;
 ```
 
 ## SettingsSingleton
 
-Use `SettingsSingleton<T>` for global data that needs to exist before worlds are created (InputAction assets, UI configuration, lookup tables, etc.). These assets still implement `ISettings`, so they appear in the Settings window, follow `[SettingsGroup]`, and are created in the same directory as other settings.
+Use `SettingsSingleton<T>` for global data that needs to exist before worlds are created (UI configuration, lookup tables, boot config assets, etc.). These assets still implement `ISettings`, so they appear in the Settings window, follow `[SettingsGroup]`, and are created in the same directory as other settings.
 
 ### Creating a Singleton
 
 ```csharp
-public class ControlSettings : SettingsSingleton<ControlSettings>
+public class GameBootstrapSettings : SettingsSingleton<GameBootstrapSettings>
 {
-    [SerializeField] private InputActionAsset asset;
-    [SerializeField] private ControlSchema[] schemas = Array.Empty<ControlSchema>();
+    [SerializeField] private TextAsset bootConfig;
+    [SerializeField] private string defaultProfile = "Default";
 
-    public InputActionAsset Asset => this.asset;
-    public IReadOnlyList<ControlSchema> Schemas => this.schemas;
+    public TextAsset BootConfig => this.bootConfig;
+    public string DefaultProfile => this.defaultProfile;
 }
 ```
 
-Create or open the asset from the Settings window and configure it like any other ScriptableObject. Access it anywhere with `ControlSettings.I`.
+Create or open the asset from the Settings window and configure it like any other ScriptableObject. Access it anywhere with `GameBootstrapSettings.I`.
 
 ### Lifetime and Initialization
 
-- `SettingsSingleton` uses `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]` and `[InitializeOnLoadMethod]` to call `Initialize` for every asset before gameplay code executes, so `ControlSettings.I` is valid immediately in both the editor and players.
+- `SettingsSingleton` uses `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]` and `[InitializeOnLoadMethod]` to call `Initialize` for every asset before gameplay code executes, so `GameBootstrapSettings.I` is valid immediately in both the editor and players.
 - Only one asset per type should exist; the settings window enforces this when it creates the asset.
 
 ### Build Inclusion
 
-During `BuildPlayer`, `CoreBuildSetup` temporarily adds every `SettingsSingleton` asset to `PlayerSettings.preloadedAssets`, guaranteeing the ScriptableObjects are included in the player build without having to reference them from scenes or Resources. After the build finishes, the processor removes those temporary entries so project settings stay clean.
+During `BuildPlayer`, `CoreBuildSetup` temporarily adds every `SettingsSingleton` asset with `IncludeInBuild == true` to `PlayerSettings.preloadedAssets`, guaranteeing the ScriptableObjects are included in the player build without having to reference them from scenes or Resources. Override `IncludeInBuild` and return `false` if a singleton should stay editor-only. After the build finishes, the processor removes those temporary entries so project settings stay clean.

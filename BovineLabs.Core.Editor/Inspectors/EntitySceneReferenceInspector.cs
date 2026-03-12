@@ -4,22 +4,18 @@
 
 namespace BovineLabs.Core.Editor.Inspectors
 {
-    using Unity.Entities;
-    using Unity.Entities.Editor;
     using Unity.Entities.Serialization;
     using Unity.Entities.UI;
-    using Unity.Properties;
     using UnityEditor;
     using UnityEditor.UIElements;
-    using UnityEngine;
     using UnityEngine.UIElements;
     using InspectorUtility = BovineLabs.Core.Editor.Internal.InspectorUtility;
 
     internal class EntitySceneReferenceInspector : PropertyInspector<EntitySceneReference>
     {
-        private PropertyElement? idField;
-        private ObjectField? objectField;
-        private Foldout? field;
+        private PropertyElement idField;
+        private ObjectField objectField;
+        private Foldout field;
 
         /// <inheritdoc/>
         public override VisualElement Build()
@@ -61,7 +57,7 @@ namespace BovineLabs.Core.Editor.Inspectors
             this.field!.text = sceneAsset == null ? this.DisplayName : $"{this.DisplayName} : {sceneAsset.name}";
         }
 
-        private SceneAsset? GetSceneAsset(EntitySceneReference sceneReference)
+        private SceneAsset GetSceneAsset(EntitySceneReference sceneReference)
         {
             if (!sceneReference.Id.IsValid)
             {

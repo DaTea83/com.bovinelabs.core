@@ -20,7 +20,7 @@ namespace BovineLabs.Core.Editor.Settings
         public const string DefaultSettingsDirectory = "Assets/Settings/Settings";
 
         [SerializeField]
-        private string[] scriptingDefineSymbols = Array.Empty<string>();
+        private List<string> scriptingDefineSymbols = new List<string>();
 
         [SerializeField]
         private KeyPath[] paths = Array.Empty<KeyPath>();
@@ -31,12 +31,12 @@ namespace BovineLabs.Core.Editor.Settings
         private SceneAsset[] prebakeScenes = Array.Empty<SceneAsset>();
 
         [SerializeField]
-        private SceneAsset? startupScene;
+        private SceneAsset startupScene;
 #endif
 
         [Header("Settings")]
         [SerializeField]
-        private SettingsAuthoring? defaultSettingsAuthoring;
+        private SettingsAuthoring defaultSettingsAuthoring;
 
         [SerializeField]
         private KeyAuthoring[] settingAuthoring = { new() { World = "service" } };
@@ -46,10 +46,10 @@ namespace BovineLabs.Core.Editor.Settings
 #if BL_CORE_EXTENSIONS && !BL_DISABLE_SUBSCENE
         public IReadOnlyList<SceneAsset> PrebakeScenes => this.prebakeScenes;
 
-        public SceneAsset? StartupScene => this.startupScene;
+        public SceneAsset StartupScene => this.startupScene;
 #endif
 
-        public SettingsAuthoring? DefaultSettingsAuthoring => this.defaultSettingsAuthoring;
+        public SettingsAuthoring DefaultSettingsAuthoring => this.defaultSettingsAuthoring;
 
         public IReadOnlyList<KeyAuthoring> SettingsAuthorings => this.settingAuthoring;
 
@@ -77,12 +77,45 @@ namespace BovineLabs.Core.Editor.Settings
             path = result.Path;
         }
 
-        public bool TryGetAuthoring(string world, out SettingsAuthoring? authoring)
+        public bool TryGetAuthoring(string world, out SettingsAuthoring authoring)
         {
             world = world.ToLower();
 
             authoring = this.settingAuthoring.FirstOrDefault(k => k.World.ToLower() == world)?.Authoring;
             return authoring;
+        }
+
+        public void EnsureDefines(IReadOnlyList<string> add, IReadOnlyList<string> remove = null)
+        {
+            bool changes = false;
+
+            foreach (var d in add)
+            {
+                if (!this.scriptingDefineSymbols.Contains(d))
+                {
+                    this.scriptingDefineSymbols.Add(d);
+                    changes = true;
+                }
+            }
+
+            if (remove != null)
+            {
+                foreach (var d in remove)
+                {
+                    if (this.scriptingDefineSymbols.Contains(d))
+                    {
+                        this.scriptingDefineSymbols.Remove(d);
+                        changes = true;
+                    }
+                }
+            }
+
+            if (changes)
+            {
+                EditorUtility.SetDirty(this);
+            }
+
+            ScriptingDefineSymbolsEditor.ApplyDefinesToAll(add, remove ?? Array.Empty<string>());
         }
 
         [Serializable]
@@ -99,7 +132,7 @@ namespace BovineLabs.Core.Editor.Settings
         {
             public string World = string.Empty;
 
-            public SettingsAuthoring? Authoring;
+            public SettingsAuthoring Authoring;
         }
     }
 }

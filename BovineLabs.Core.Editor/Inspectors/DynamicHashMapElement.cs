@@ -8,7 +8,6 @@ namespace BovineLabs.Core.Editor.Inspectors
     using System.Collections.Generic;
     using BovineLabs.Core.Editor.SearchWindow;
     using BovineLabs.Core.Iterators;
-    using Unity.Entities;
     using UnityEditor.UIElements;
     using UnityEngine.UIElements;
 
@@ -17,7 +16,7 @@ namespace BovineLabs.Core.Editor.Inspectors
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
-        public DynamicHashMapElement(object inspector, List<SearchView.Item>? items = null, TValue defaultValue = default)
+        public DynamicHashMapElement(object inspector, List<SearchView.Item> items = null, TValue defaultValue = default)
             : base(inspector, items, defaultValue)
         {
         }
@@ -30,12 +29,12 @@ namespace BovineLabs.Core.Editor.Inspectors
     {
         private readonly DynamicHashMapListElement<T, TBuffer, TKey, TValue> listElement;
 
-        private readonly DynamicHashMapSearchElement<T, TBuffer, TKey, TValue>? searchElement;
+        private readonly DynamicHashMapSearchElement<T, TBuffer, TKey, TValue> searchElement;
 
         private readonly ToolbarToggle listElementToggle;
         private readonly ToolbarToggle searchToggle;
 
-        public DynamicHashMapElement(object inspector, List<SearchView.Item>? items = null, TValue defaultValue = default)
+        public DynamicHashMapElement(object inspector, List<SearchView.Item> items = null, TValue defaultValue = default)
         {
             var hasItems = items is { Count: > 0 };
             this.listElementToggle = new ToolbarToggle();
@@ -130,7 +129,6 @@ namespace BovineLabs.Core.Editor.Inspectors
                 return;
             }
 
-            // TODO conditional on visible
             this.listElement.Update();
             this.searchElement?.Update();
         }

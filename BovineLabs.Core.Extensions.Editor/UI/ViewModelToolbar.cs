@@ -2,7 +2,6 @@
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
-#if UNITY_6000_3_OR_NEWER
 namespace BovineLabs.Core.Editor.UI
 {
     using System;
@@ -48,7 +47,12 @@ namespace BovineLabs.Core.Editor.UI
         {
             viewModels.Clear();
 
-            var documents = Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None).Where(d => d.rootVisualElement != null).ToArray();
+#if UNITY_6000_5_OR_NEWER
+            var documents = Object.FindObjectsByType<UIDocument>()
+#else
+            var documents = Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None)
+#endif
+                .Where(d => d.rootVisualElement != null).ToArray();
 
             foreach (var d in documents)
             {
@@ -132,4 +136,3 @@ namespace BovineLabs.Core.Editor.UI
         }
     }
 }
-#endif

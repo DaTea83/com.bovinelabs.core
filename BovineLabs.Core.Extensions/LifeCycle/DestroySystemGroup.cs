@@ -14,10 +14,12 @@ namespace BovineLabs.Core.LifeCycle
     /// Handles destruction of entities. Runs before SceneSystemGroup to properly cleanup entities in closing subscenes.
     /// </summary>
     [BurstCompile]
+    [WorldSystemFilter(Worlds.SimulationEditor | Worlds.Menu, Worlds.Simulation)]
     [UpdateInGroup(typeof(BeforeSceneSystemGroup))]
     [UpdateAfter(typeof(InstantiateCommandBufferSystem))]
     public partial class DestroySystemGroup : ComponentSystemGroup
     {
+        /// <inheritdoc/>
         protected override void OnUpdate()
         {
             var query = SystemAPI.QueryBuilder().WithAll<DestroyEntity>().Build();

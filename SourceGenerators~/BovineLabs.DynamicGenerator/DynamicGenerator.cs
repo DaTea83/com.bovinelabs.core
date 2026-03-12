@@ -1,4 +1,4 @@
-﻿// <copyright file="DynamicGenerator.cs" company="BovineLabs">
+// <copyright file="DynamicGenerator.cs" company="BovineLabs">
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
@@ -6,7 +6,6 @@ namespace BovineLabs.DynamicGenerator
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using CodeGenHelpers;
     using Microsoft.CodeAnalysis;
@@ -172,6 +171,9 @@ namespace BovineLabs.DynamicGenerator
                     case "IDynamicUntypedHashMap" when typeParamCount == 1:
                         matches.Add(new DynamicInterface(DynamicType.UntypedHashMap, interfaceSymbol));
                         break;
+                    case "IDynamicUntypedBuffer" when typeParamCount == 0:
+                        matches.Add(new DynamicInterface(DynamicType.UntypedBuffer, interfaceSymbol));
+                        break;
                     case "IDynamicVariableMap" when typeParamCount == 4:
                         matches.Add(new DynamicInterface(DynamicType.VariableMap, interfaceSymbol));
                         break;
@@ -195,6 +197,7 @@ namespace BovineLabs.DynamicGenerator
                 DynamicType.MultiHashMap => new DynamicData(typeSymbol, dynamicInterface.Type, arguments[0], arguments[1]),
                 DynamicType.PerfectHashMap => new DynamicData(typeSymbol, dynamicInterface.Type, arguments[0], arguments[1]),
                 DynamicType.UntypedHashMap => new DynamicData(typeSymbol, dynamicInterface.Type, arguments[0]),
+                DynamicType.UntypedBuffer => new DynamicData(typeSymbol, dynamicInterface.Type),
                 DynamicType.VariableMap => new DynamicData(typeSymbol, dynamicInterface.Type, arguments[0], arguments[1], arguments[2], arguments[3]),
                 DynamicType.VariableMap2 => new DynamicData(typeSymbol, dynamicInterface.Type, arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5]),
                 _ => throw new ArgumentOutOfRangeException(nameof(dynamicInterface.Type), dynamicInterface.Type, "Unexpected dynamic interface type"),
@@ -254,6 +257,7 @@ namespace BovineLabs.DynamicGenerator
                     DynamicType.HashSet => $"InitializeHashSet<{data.TypeName}, {data.Type1}>",
                     DynamicType.MultiHashMap => $"InitializeMultiHashMap<{data.TypeName}, {data.Type1}, {data.Type2}>",
                     DynamicType.UntypedHashMap => $"InitializeUntypedHashMap<{data.TypeName}, {data.Type1}>",
+                    DynamicType.UntypedBuffer => $"InitializeUntypedBuffer<{data.TypeName}>",
                     DynamicType.VariableMap => $"InitializeVariableMap<{data.TypeName}, {data.Type1}, {data.Type2}, {data.Type3}, {data.Type4}>",
                     DynamicType.VariableMap2 => $"InitializeVariableMap<{data.TypeName}, {data.Type1}, {data.Type2}, {data.Type3}, {data.Type4}, {data.Type5}, {data.Type6}>",
                     _ => throw new ArgumentOutOfRangeException()
@@ -272,6 +276,7 @@ namespace BovineLabs.DynamicGenerator
                 DynamicType.MultiHashMap => $"DynamicMultiHashMap<{data.Type1}, {data.Type2}>",
                 DynamicType.PerfectHashMap => $"DynamicPerfectHashMap<{data.Type1}, {data.Type2}>",
                 DynamicType.UntypedHashMap => $"DynamicUntypedHashMap<{data.Type1}>",
+                DynamicType.UntypedBuffer => "DynamicUntypedBuffer",
                 DynamicType.VariableMap => $"DynamicVariableMap<{data.Type1}, {data.Type2}, {data.Type3}, {data.Type4}>",
                 DynamicType.VariableMap2 => $"DynamicVariableMap<{data.Type1}, {data.Type2}, {data.Type3}, {data.Type4}, {data.Type5}, {data.Type6}>",
                 _ => throw new ArgumentOutOfRangeException()
@@ -293,6 +298,7 @@ namespace BovineLabs.DynamicGenerator
                     DynamicType.MultiHashMap => $"AsMultiHashMap<{data.TypeName}, {data.Type1}, {data.Type2}>",
                     DynamicType.PerfectHashMap => $"AsPerfectHashMap<{data.TypeName}, {data.Type1}, {data.Type2}>",
                     DynamicType.UntypedHashMap => $"AsUntypedHashMap<{data.TypeName}, {data.Type1}>",
+                    DynamicType.UntypedBuffer => $"AsUntypedBuffer<{data.TypeName}>",
                     DynamicType.VariableMap => $"AsVariableMap<{data.TypeName}, {data.Type1}, {data.Type2}, {data.Type3}, {data.Type4}>",
                     DynamicType.VariableMap2 => $"AsVariableMap<{data.TypeName}, {data.Type1}, {data.Type2}, {data.Type3}, {data.Type4}, {data.Type5}, {data.Type6}>",
                     _ => throw new ArgumentOutOfRangeException(),
@@ -309,6 +315,7 @@ namespace BovineLabs.DynamicGenerator
             MultiHashMap,
             PerfectHashMap,
             UntypedHashMap,
+            UntypedBuffer,
             VariableMap,
             VariableMap2,
         }
@@ -318,7 +325,7 @@ namespace BovineLabs.DynamicGenerator
             public DynamicData(
                 INamedTypeSymbol typeSymbol,
                 DynamicType type,
-                ITypeSymbol type1,
+                ITypeSymbol type1 = null,
                 ITypeSymbol type2 = null,
                 ITypeSymbol type3 = null,
                 ITypeSymbol type4 = null,

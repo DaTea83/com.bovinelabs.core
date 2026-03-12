@@ -41,7 +41,7 @@ if (PauseGame.IsPaused(ref state))
 ### Normal Pause (`PauseAll = false`)
 - Only systems marked with `IDisableWhilePaused` or in `PauseUtility.DisableWhilePaused` stop updating
 - Other systems continue normal operation
-- Ideal for in-game pause menus where UI and input should remain active
+- Ideal for in-game pause menus where UI and selected systems should remain active
 
 ### Full Pause (`PauseAll = true`)
 - All systems stop updating except those marked with `IUpdateWhilePaused` or in `PauseUtility.UpdateWhilePaused`
@@ -64,10 +64,9 @@ public partial struct MySystem : ISystem, IUpdateWhilePaused
 ```
 
 **Built-in systems that implement this interface:**
-- `InputSystemGroup` - Input processing continues
 - `DebugSystemGroup` - Debug functionality remains active
 - `SingletonInitializeSystemGroup` - Initialization systems
-- `InitializationSystemGroup` - Core initialization
+- `SceneInitializeSystem` - Scene initialization can continue while paused
 
 ### IDisableWhilePaused
 Marker interface for root systems that should stop during normal pause mode.

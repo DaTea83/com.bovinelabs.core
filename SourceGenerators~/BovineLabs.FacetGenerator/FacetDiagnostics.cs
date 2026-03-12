@@ -1,4 +1,4 @@
-﻿// <copyright file="FacetDiagnostics.cs" company="BovineLabs">
+// <copyright file="FacetDiagnostics.cs" company="BovineLabs">
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
@@ -23,7 +23,7 @@ namespace BovineLabs.FacetGenerator
         internal static readonly DiagnosticDescriptor UnsupportedFieldDescriptor = new DiagnosticDescriptor(
             "BLFCT0002",
             "Facet field type not supported",
-            "Field '{0}' of type '{1}' is not supported. Supported types are RefRO<T>, RefRW<T>, EnabledRefRO<T>, EnabledRefRW<T>, DynamicBuffer<T>, Entity, and fields marked with [Singleton].",
+            "Field '{0}' of type '{1}' is not supported. Supported types are RefRO<T>, RefRW<T>, EnabledRefRO<T>, EnabledRefRW<T>, DynamicBuffer<T>, ComponentLookup<T>, BufferLookup<T>, Entity, EntityStorageInfo, EntityStorageInfoLookup, and fields marked with [Singleton].",
             Category,
             DiagnosticSeverity.Error,
             true);
@@ -60,7 +60,32 @@ namespace BovineLabs.FacetGenerator
             DiagnosticSeverity.Error,
             true);
 
+        internal static readonly DiagnosticDescriptor ReadOnlySingletonBufferDescriptor = new DiagnosticDescriptor(
+            "BLFCT0007",
+            "DynamicBuffer singleton must be ReadOnly",
+            "Singleton DynamicBuffer field '{0}' must be marked with [ReadOnly]",
+            Category,
+            DiagnosticSeverity.Error,
+            true);
+
+        internal static readonly DiagnosticDescriptor FacetCycleDescriptor = new DiagnosticDescriptor(
+            "BLFCT0008",
+            "Facet reference cycle detected",
+            "Field '{0}' creates a cyclic facet reference to '{1}'",
+            Category,
+            DiagnosticSeverity.Error,
+            true);
+
+        internal static readonly DiagnosticDescriptor SingletonAttributeConflictDescriptor = new DiagnosticDescriptor(
+            "BLFCT0009",
+            "Singleton attribute conflicts",
+            "Field '{0}' cannot be marked with [Singleton] and [Facet] or [FacetOptional]",
+            Category,
+            DiagnosticSeverity.Error,
+            true);
+
         public static Diagnostic MissingPartial(INamedTypeSymbol typeSymbol, Location location)
+
         {
             return Diagnostic.Create(MissingPartialDescriptor, location, typeSymbol.ToDisplayString(FacetGenerator.ShortTypeFormat));
         }
@@ -105,7 +130,33 @@ namespace BovineLabs.FacetGenerator
                 fieldSymbol.Type.ToDisplayString(FacetGenerator.ShortTypeFormat));
         }
 
+        public static Diagnostic ReadOnlySingletonBuffer(IFieldSymbol fieldSymbol, Location location)
+        {
+            return Diagnostic.Create(
+                ReadOnlySingletonBufferDescriptor,
+                location ?? fieldSymbol.Locations[0],
+                fieldSymbol.Name);
+        }
+
+        public static Diagnostic SingletonAttributeConflict(IFieldSymbol fieldSymbol, Location location)
+        {
+            return Diagnostic.Create(
+                SingletonAttributeConflictDescriptor,
+                location ?? fieldSymbol.Locations[0],
+                fieldSymbol.Name);
+        }
+
+        public static Diagnostic FacetCycle(IFieldSymbol fieldSymbol, Location location, INamedTypeSymbol facetType)
+        {
+            return Diagnostic.Create(
+                FacetCycleDescriptor,
+                location ?? fieldSymbol.Locations[0],
+                fieldSymbol.Name,
+                facetType.ToDisplayString(FacetGenerator.ShortTypeFormat));
+        }
+
         private static string GetComponentName(IFieldSymbol fieldSymbol)
+
         {
             if (fieldSymbol.Type is INamedTypeSymbol named && named.TypeArguments.Length == 1)
             {

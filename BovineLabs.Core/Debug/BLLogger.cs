@@ -11,6 +11,7 @@ namespace BovineLabs.Core
     using Unity.Burst;
     using Unity.Collections;
     using Unity.Entities;
+    using Unity.Properties;
     using UnityEngine;
 
     [Configurable]
@@ -22,10 +23,17 @@ namespace BovineLabs.Core
         [ConfigVar(LogLevelName, LogLevelDefaultValue, "The log level debugging for BovineLabs libraries.")]
         internal static readonly SharedStatic<int> CurrentLogLevel = SharedStatic<int>.GetOrCreate<BLLogger>();
 
+        [CreateProperty(ReadOnly = true)]
         internal FixedString32Bytes World;
+
+        [CreateProperty(ReadOnly = true)]
         internal int Frame;
 
+        [CreateProperty(ReadOnly = true)]
         public bool IsValid => !this.World.IsEmpty;
+
+        [CreateProperty(ReadOnly = true)]
+        private LogLevel LogLevel => (LogLevel)CurrentLogLevel.Data;
 
         public static LogLevel Level => (LogLevel)CurrentLogLevel.Data;
 

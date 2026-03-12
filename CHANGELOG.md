@@ -1,5 +1,63 @@
 # Changelog
 
+## [1.6.0] - 2026-03-13
+
+### Breaking
+* Unity 6.3+ only
+* Package now targets 6000.3 / Entities 1.4.3
+* Input moved to Bridge
+* Camera moved to Bridge
+
+### Added
+* Experimental Relevancy extension
+* Relevancy authoring and settings
+* Relevancy netcode system group
+* NativeUntypedHashMap
+* DynamicUntypedBuffer
+* UnsafeListPool
+* TagAuthoring
+* TypeAsset
+* ComponentAssetBase
+* ToggleOption
+* BlobAssetOwnerInspector
+* More inspector helpers
+* Singleton buffer support
+* TransformUtility.SetupLocalToWorld
+* CreateEntity overloads with names
+
+### Changed
+* BurstTrampoline simplified
+* BurstTrampoline now uses payload based invocation
+* Added BurstTrampoline extension helpers
+* Facet generator reworked
+* Added optional nested facets
+* Improved facet singleton handling
+* Object management now supports abstract bases
+* AutoRef now supports inheritance
+* IUID now supports inheritance
+* IUIDs now start at 1
+
+### Fixed
+* DestroyOnDestroySystem thread safety
+* NativeParallelMultiHashMapFallback hashing
+* DynamicUntypedBuffer alignment
+* DynamicUntypedHashMap edge cases
+* Facet lookup issues with nested facets
+* Facet lookup issues with readonly facets
+* ResolvedChunk silent facet resolution failures
+* SubSceneEditorToolbar stability
+* CreateEditorWorld on leaving play mode
+* 6.3 compile issues
+* 6.4 compile issues
+* 6.5 compile issues
+* Linux path trimming
+* Missing UNITY_PHYSICS guards
+
+### Removed
+* FontCharactersWindow
+* Input
+* Camera
+
 ## [1.5.2] - 2026-01-16
 
 ### Fixed

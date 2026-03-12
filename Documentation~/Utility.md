@@ -38,12 +38,6 @@ Zero-allocation collection utilities for performance-critical scenarios.
 - `ExtractArrayFromList()` - Access internal array of List<T>
 - `ResizeList()` - Resize lists without allocations
 
-### `WorldAllocator`
-World-specific memory allocation management.
-- Per-world allocator management
-- Integration with BovineLabsBootstrap
-- Automatic cleanup on world destruction
-
 ## Threading & Synchronization
 
 ### `EntityLock`

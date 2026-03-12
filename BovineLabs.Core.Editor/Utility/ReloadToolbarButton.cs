@@ -2,7 +2,6 @@
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
-#if UNITY_6000_3_OR_NEWER
 namespace BovineLabs.Core.Editor.Utility
 {
     using BovineLabs.Core.Editor.Internal;
@@ -15,7 +14,7 @@ namespace BovineLabs.Core.Editor.Utility
     public static class ReloadToolbarButton
     {
         private const string ReloadPath = "BovineLabs/Reload";
-        private static MainToolbarDropdown? dropDown;
+        private static MainToolbarDropdown dropDown;
 
         static ReloadToolbarButton()
         {
@@ -29,7 +28,7 @@ namespace BovineLabs.Core.Editor.Utility
         {
             var icon = (Texture2D)EditorGUIUtility.IconContent("Refresh").image;
             var content = new MainToolbarContent(icon, "Reload");
-            dropDown = new MainToolbarDropdown(content, ClickEvent) { enabled = !EditorApplication.isPlayingOrWillChangePlaymode };
+            dropDown = new MainToolbarDropdown(content, ClickEvent) { enabled = !EditorApplication.isPlaying };
             return dropDown;
         }
 
@@ -38,7 +37,7 @@ namespace BovineLabs.Core.Editor.Utility
             switch (obj)
             {
                 case PlayModeStateChange.EnteredPlayMode:
-                case PlayModeStateChange.ExitingPlayMode:
+                case PlayModeStateChange.EnteredEditMode:
                     RefreshReload();
                     break;
             }
@@ -58,4 +57,3 @@ namespace BovineLabs.Core.Editor.Utility
         }
     }
 }
-#endif

@@ -24,10 +24,12 @@ Once installed, the library provides utilities, custom containers, and high-perf
 | [Facets](Documentation~/Facets.md)                               | Source-generated `IFacet` helpers that provide aspect-like access via lookups and chunk iteration                                     |
 | [Extensions](Documentation~/Extensions.md)                       | Extension methods that enhance Unity's DOTS APIs with performance optimizations and convenience methods                               |
 | [Functions](Documentation~/Functions.md)                         | Extensible way to add support for extending jobs to other developers or modders                                                       |
+| [Inspectors](Documentation~/Inspectors.md)                       | UI Toolkit base classes for custom editors and property drawers with prefab-aware variants and fallback field rendering               |
 | [Iterators](Documentation~/Iterators.md)                         | High-performance iterator utilities for ECS applications with Burst-compatible enumeration capabilities                               |
 | [Jobs](Documentation~/Jobs.md)                                   | Custom jobs (IJobForThread, IJobParallelForDeferBatch, IJobHashMapDefer, IJobParallelHashMapDefer)                                    |
 | [K](Documentation~/K.md)                                         | K is a type-safe, Burst-compatible alternative to Enums and LayerMasks that allows you to define key-value pairs in settings files    |
 | [Settings](Documentation~/Settings.md)                           | Settings framework for managing and creating settings                                                                                 | 
+| [Singleton Buffers](Documentation~/SingletonBuffers.md)         | Merge dynamic buffers from many sources into a single runtime singleton buffer entity                                                |
 | [Singleton Collection](Documentation~/SingletonCollection.md)    | Easily set up a Many-To-One container singleton with minimal boilerplate and syncless job support                                     | 
 | [Spatial](Documentation~/Spatial.md)                             | Fast spatial hashmap generation                                                                                                       |
 | [States](Documentation~/States.md)                               | Provides states on entities by mapping a bit field to components automatically                                                        |
@@ -48,9 +50,7 @@ The Core library maintains the status quo in your project by default. However, t
 | Feature                                                 | Description                                                                                           |
 |---------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
 | [Analyzers](Documentation~/Analyzers.md)                | Automatic Roslyn analyzer integration infrastructure for seamless code analysis and style enforcement |
-| [Camera](Documentation~/Camera.md)                      | ECS camera integration with frustum culling and Unity Camera synchronization                          |
 | [EntityBlob](Documentation~/EntityBlob.md)              | Memory-efficient storage of multiple BlobAssetReferences in a single blob using perfect hash maps     |
-| [Input](Documentation~/Input.md)                        | Support for input integrated with entities using source generation and common properties              |
 | [Life Cycle](Documentation~/LifeCycle.md)               | Framework for managing entity initialization and destruction                                          |
 | [Object Management](Documentation~/ObjectManagement.md) | Automatic ID, category and group management                                                           |
 | [Pause](Documentation~/Pause.md)                        | World-level pause system with fine-grained control over system updates during pause states            |

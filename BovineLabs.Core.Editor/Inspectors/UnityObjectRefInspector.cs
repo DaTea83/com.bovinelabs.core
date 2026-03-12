@@ -18,7 +18,7 @@ namespace BovineLabs.Core.Editor.Inspectors
     internal abstract class UnityObjectRefInspector<T> : PropertyInspector<UnityObjectRef<T>>
         where T : Object
     {
-        private ObjectField? objectField;
+        private ObjectField objectField;
 
         /// <inheritdoc/>
         public override VisualElement Build()
@@ -76,7 +76,6 @@ namespace BovineLabs.Core.Editor.Inspectors
     {
     }
 
-#if UNITY_INPUT
     [UsedImplicitly]
     internal class InputActionAssetUnityObjectRefInspector : UnityObjectRefInspector<UnityEngine.InputSystem.InputActionAsset>
     {
@@ -86,7 +85,6 @@ namespace BovineLabs.Core.Editor.Inspectors
     internal class InputActionReferenceUnityObjectRefInspector : UnityObjectRefInspector<UnityEngine.InputSystem.InputActionReference>
     {
     }
-#endif
 
 #if UNITY_SPLINES
     [UsedImplicitly]

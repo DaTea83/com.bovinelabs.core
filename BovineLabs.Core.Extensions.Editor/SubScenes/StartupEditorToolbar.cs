@@ -2,7 +2,7 @@
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
-#if !BL_DISABLE_SUBSCENE && UNITY_6000_3_OR_NEWER
+#if !BL_DISABLE_SUBSCENE
 namespace BovineLabs.Core.Editor.SubScenes
 {
     using System.Linq;
@@ -19,7 +19,7 @@ namespace BovineLabs.Core.Editor.SubScenes
         private const string StartupPath = "BovineLabs/Startup";
         private const int MaxLength = 25;
 
-        private static MainToolbarDropdown? startupDropDown;
+        private static MainToolbarDropdown startupDropDown;
 
         static StartupEditorToolbar()
         {

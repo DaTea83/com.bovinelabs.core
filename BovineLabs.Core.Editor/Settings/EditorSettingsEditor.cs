@@ -4,7 +4,6 @@
 
 namespace BovineLabs.Core.Editor.Settings
 {
-    using System;
     using System.Collections.Generic;
     using BovineLabs.Core.Authoring.Settings;
     using BovineLabs.Core.Editor.Inspectors;
@@ -20,7 +19,8 @@ namespace BovineLabs.Core.Editor.Settings
         private readonly List<string> removed = new();
 
 
-        protected override VisualElement? CreateElement(SerializedProperty property)
+        /// <inheritdoc/>
+        protected override VisualElement CreateElement(SerializedProperty property)
         {
             return property.name switch
             {
@@ -163,7 +163,7 @@ namespace BovineLabs.Core.Editor.Settings
 
             return;
 
-            static void ClearSettings(SettingsAuthoring? authoring)
+            static void ClearSettings(SettingsAuthoring authoring)
             {
                 if (authoring == null)
                 {

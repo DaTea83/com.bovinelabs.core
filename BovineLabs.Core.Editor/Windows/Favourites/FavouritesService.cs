@@ -19,7 +19,7 @@ namespace BovineLabs.Core.Editor.Windows.Favourites
     {
         public const string PreferenceKey = "Favourites";
 
-        private static FavouritesService? instance;
+        private static FavouritesService instance;
 
         private readonly List<FavouritesItem> favourites = new();
 
@@ -240,7 +240,7 @@ namespace BovineLabs.Core.Editor.Windows.Favourites
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"Failed to save favourites: {ex.Message}");
+                BLGlobalLogger.LogWarningString($"Failed to save favourites: {ex.Message}");
             }
         }
 
@@ -274,7 +274,7 @@ namespace BovineLabs.Core.Editor.Windows.Favourites
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"Failed to load favourites: {ex.Message}");
+                BLGlobalLogger.LogWarningString($"Failed to load favourites: {ex.Message}");
             }
         }
     }

@@ -2,9 +2,10 @@
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
-#if !BL_DISABLE_SUBSCENE && UNITY_6000_3_OR_NEWER
+#if !BL_DISABLE_SUBSCENE
 namespace BovineLabs.Core.Editor.SubScenes
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using BovineLabs.Core.Authoring.SubScenes;
@@ -17,6 +18,7 @@ namespace BovineLabs.Core.Editor.SubScenes
     using Unity.Collections;
     using Unity.Entities;
     using Unity.Scenes;
+    using Unity.Scenes.Editor;
     using UnityEditor;
     using UnityEditor.SceneManagement;
     using UnityEditor.Toolbars;
@@ -39,7 +41,8 @@ namespace BovineLabs.Core.Editor.SubScenes
         private static readonly Dictionary<Hash128, SubScene> TempSubScenes = new();
         private static readonly Dictionary<SceneAsset, SubScene> EditorSubScenes = new();
 
-        private static MainToolbarDropdown? sceneDropDown;
+        [CanBeNull]
+        private static MainToolbarDropdown sceneDropDown;
 
         static SubSceneEditorToolbar()
         {
@@ -87,17 +90,25 @@ namespace BovineLabs.Core.Editor.SubScenes
                     MainToolbar.Refresh(SceneSetPath);
                     break;
                 case PlayModeStateChange.ExitingEditMode:
-                    foreach (var s in EditorSubScenes)
-                    {
-                        if (s.Value)
-                        {
-                            Object.DestroyImmediate(s.Value.gameObject);
-                        }
-                    }
-
-                    EditorSubScenes.Clear();
+                    CleanupSubScenes();
                     break;
             }
+        }
+
+        private static void CleanupSubScenes()
+        {
+            foreach (var s in EditorSubScenes)
+            {
+                if (!s.Value)
+                {
+                    continue;
+                }
+
+                SubSceneInspectorUtility.CloseAndAskSaveIfUserWantsTo(s.Value);
+                Object.DestroyImmediate(s.Value.gameObject);
+            }
+
+            EditorSubScenes.Clear();
         }
 
         private static void CleanupOldSubScenes()
@@ -107,13 +118,14 @@ namespace BovineLabs.Core.Editor.SubScenes
                 if (!s.Value)
                 {
                     var scene = SceneManager.GetSceneByPath(AssetDatabase.GUIDToAssetPath(s.Key));
+                    EditorSceneManager.SaveScene(scene);
                     SceneManager.UnloadSceneAsync(scene);
                     TempSubScenes.Remove(s.Key);
                 }
             }
         }
 
-        private static void SceneSelectionClicked<T>(T worldBound, bool baking)
+        private static void SceneSelectionClicked<T>(T dropDown, bool baking)
             where T : IDropDown
         {
             if (EditorApplication.isPlaying)
@@ -123,22 +135,22 @@ namespace BovineLabs.Core.Editor.SubScenes
                     return;
                 }
 
-                LivingBakingDropdown(worldBound);
+                LivingBakingDropdown(dropDown);
             }
             else
             {
                 if (baking)
                 {
-                    SceneSelectionDropDown(worldBound, (_, _, _) => true, AddSceneBake);
+                    SceneSelectionDropDown(dropDown, true, (_, _, _) => true, AddSceneBake);
                 }
                 else
                 {
-                    SceneSelectionDropDown(worldBound, AddSetOpen, AddSceneOpen);
+                    SceneSelectionDropDown(dropDown, false, AddSetOpen, AddSceneOpen);
                 }
             }
         }
 
-        private static void SceneSelectionDropDown<T>(T dropDown, AddSetDelegate<T> addSet, AddSceneDelegate<T> addScene)
+        private static void SceneSelectionDropDown<T>(T dropDown, bool isBaking, AddSetDelegate<T> addSet, AddSceneDelegate<T> addScene)
             where T : IDropDown
         {
             var settings = EditorSettingsUtility.GetSettings<SubSceneSettings>();
@@ -161,13 +173,14 @@ namespace BovineLabs.Core.Editor.SubScenes
                     continue;
                 }
 
-                var scenes = set
-                    .Scenes
-                    .Where(scene => scene)
-                    .Concat(EditorBuildSettings.scenes.Select(s => AssetDatabase.LoadAssetAtPath<SceneAsset>(s.path)))
-                    .Distinct()
-                    .Where(sa => sa)
-                    .OrderBy(sa => sa.name);
+                var scenes = set.Scenes.Where(scene => scene);
+
+                if (!isBaking)
+                {
+                    scenes = scenes.Concat(EditorBuildSettings.scenes.Select(s => AssetDatabase.LoadAssetAtPath<SceneAsset>(s.path)));
+                }
+
+                scenes = scenes.Distinct().Where(sa => sa).OrderBy(sa => sa.name);
 
                 foreach (var scene in scenes)
                 {
@@ -254,6 +267,11 @@ namespace BovineLabs.Core.Editor.SubScenes
             var sceneName = scene.name.ToSentence();
             dropDown.AddItem($"{setName}/{sceneName}", false, _ =>
             {
+                if (AlreadyExists(scene))
+                {
+                    return;
+                }
+
                 // If it's already open, we have to close it before converting it
                 if (EditorSceneUtil.IsSceneAssetOpen(scene))
                 {
@@ -273,36 +291,67 @@ namespace BovineLabs.Core.Editor.SubScenes
                     EditorSceneManager.CloseScene(scenePath, true);
                 }
 
-                if (!EditorSubScenes.TryGetValue(scene, out var subScene) || !subScene)
+                var go = new GameObject
                 {
-                    foreach (var subscene in Object.FindObjectsByType<SubScene>(FindObjectsSortMode.None))
-                    {
-                        if (subscene.SceneAsset == scene)
-                        {
-                            subScene = subscene;
-                            break;
-                        }
-                    }
+                    hideFlags = HideFlags.DontSaveInEditor,
+                    name = scene.name,
+                };
 
-                    if (!subScene)
-                    {
-                        var go = new GameObject { hideFlags = HideFlags.DontSave };
-                        subScene = go.AddComponent<SubScene>();
-                        subScene.SceneAsset = scene;
-                        EditorSubScenes[scene] = subScene;
-                    }
-                }
+                var subScene = go.AddComponent<SubScene>();
+                subScene.SceneAsset = scene;
+                var goc = go.AddComponent<GameObjectCleanup>();
+                goc.IsActive = true;
+                goc.hideFlags = HideFlags.HideInInspector;
+
+                EditorSubScenes[scene] = subScene;
 
                 SubSceneUtility.EditScene(subScene);
             }, scene);
         }
 
+        private static bool AlreadyExists(SceneAsset scene)
+        {
+#if UNITY_6000_5_OR_NEWER
+            var subScenes = Object.FindObjectsByType<SubScene>(FindObjectsInactive.Include);
+#else
+            var subScenes = Object.FindObjectsByType<SubScene>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+#endif
+
+            foreach (var subscene in subScenes)
+            {
+                if (subscene.SceneAsset == scene)
+                {
+                    return true;
+                }
+            }
+
+            foreach (var es in EditorSubScenes)
+            {
+                if (!es.Value)
+                {
+                    continue;
+                }
+
+                if (es.Key == scene)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static void LivingBakingDropdown<T>(T menu)
             where T : IDropDown
         {
-            var scenes = new Dictionary<Hash128, SubScene?>();
+            var scenes = new Dictionary<Hash128, SubScene>();
 
+#if UNITY_6000_5_OR_NEWER
+            var subScenes = Object.FindObjectsByType<SubScene>();
+#else
             var subScenes = Object.FindObjectsByType<SubScene>(FindObjectsSortMode.None);
+#endif
+
             foreach (var s in subScenes)
             {
                 scenes.Add(s.SceneGUID, s);
@@ -351,7 +400,7 @@ namespace BovineLabs.Core.Editor.SubScenes
                 {
                     menu.AddItem(L10n.Tr(sceneAsset.ToString()), true, static data =>
                     {
-                        var (key, subScene) = (KeyValuePair<Hash128, SubScene?>)data;
+                        var (key, subScene) = (KeyValuePair<Hash128, SubScene>)data;
 
                         if (TempSubScenes.Remove(key))
                         {
@@ -377,7 +426,7 @@ namespace BovineLabs.Core.Editor.SubScenes
                 {
                     menu.AddItem(sceneAsset.name, false, static data =>
                     {
-                        var (key, subScene) = (KeyValuePair<Hash128, SubScene?>)data;
+                        var (key, subScene) = (KeyValuePair<Hash128, SubScene>)data;
 
                         var path = AssetDatabase.GUIDToAssetPath(key);
                         var scene = SceneManager.GetSceneByPath(path);
@@ -390,7 +439,8 @@ namespace BovineLabs.Core.Editor.SubScenes
                         if (!subScene)
                         {
                             var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
-                            subScene = new GameObject().AddComponent<SubScene>();
+                            var go = new GameObject { name = sceneAsset.name };
+                            subScene = go.AddComponent<SubScene>();
                             subScene.AutoLoadScene = false;
                             subScene.SceneAsset = sceneAsset;
                             TempSubScenes[subScene.SceneGUID] = subScene;

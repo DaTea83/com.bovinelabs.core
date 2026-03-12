@@ -23,12 +23,12 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
     {
         private static readonly Dictionary<GameObject, ObjectInstantiate> PreviewInstantiateMap = new();
 
-        [ConfigVar("core.instantiate-replace", true, "Should object definition targets be replaced when dropping in scene")]
+        [ConfigVar("core.instantiate-replace", false, "Should object definition targets be replaced when dropping in scene")]
         private static readonly SharedStatic<bool> Replace = SharedStatic<bool>.GetOrCreate<ReplaceType>();
 
-        private ObjectDefinitionAuthoring? preview;
+        private ObjectDefinitionAuthoring preview;
         private GameObject[] previewChildren = Array.Empty<GameObject>();
-        private ObjectDefinition? previousDefinition;
+        private ObjectDefinition previousDefinition;
 
         public static void TryReplace(GameObject newGameObject)
         {
@@ -173,11 +173,14 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
                 stream.GetCreateGameObjectHierarchyEvent(i, out var createGameObjectHierarchyEvent);
 #if UNITY_6000_4_OR_NEWER
                 var newGameObject = (GameObject)EditorUtility.EntityIdToObject(createGameObjectHierarchyEvent.entityId);
-#elif UNITY_6000_3_OR_NEWER
-                var newGameObject = (GameObject)EditorUtility.EntityIdToObject(createGameObjectHierarchyEvent.instanceId);
 #else
-                var newGameObject = (GameObject)EditorUtility.InstanceIDToObject(createGameObjectHierarchyEvent.instanceId);
+                var newGameObject = (GameObject)EditorUtility.EntityIdToObject(createGameObjectHierarchyEvent.instanceId);
 #endif
+                if (newGameObject == null)
+                {
+                    continue;
+                }
+
                 TryReplace(newGameObject);
             }
         }

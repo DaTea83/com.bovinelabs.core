@@ -15,7 +15,7 @@ namespace BovineLabs.Core.SubScenes
     using Hash128 = Unity.Entities.Hash128;
 
     [UpdateInGroup(typeof(AfterSceneSystemGroup), OrderFirst = true)]
-    [WorldSystemFilter(Worlds.SimulationService)]
+    [WorldSystemFilter(Worlds.SimulationService | Worlds.Menu)]
     [UpdateBefore(typeof(SubSceneLoadingSystem))]
     public partial class SubSceneLoadingManagedSystem : SystemBase
     {
@@ -62,7 +62,11 @@ namespace BovineLabs.Core.SubScenes
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+#if UNITY_6000_5_OR_NEWER
+            var subScenes = Object.FindObjectsByType<SubScene>();
+#else
             var subScenes = Object.FindObjectsByType<SubScene>(FindObjectsSortMode.None);
+#endif
 
             foreach (var subScene in subScenes)
             {
@@ -78,7 +82,11 @@ namespace BovineLabs.Core.SubScenes
 
         private void LoadAllExistingSubScenes()
         {
+#if UNITY_6000_5_OR_NEWER
+            var subScenes = Object.FindObjectsByType<SubScene>();
+#else
             var subScenes = Object.FindObjectsByType<SubScene>(FindObjectsSortMode.None);
+#endif
 
             foreach (var subScene in subScenes)
             {
@@ -93,8 +101,13 @@ namespace BovineLabs.Core.SubScenes
                 return;
             }
 
+            // TODO merge components/SubSceneAuthUtil
             var entity = this.EntityManager.CreateEntity(typeof(SubSceneLoadData), typeof(SubSceneEntity), typeof(SubSceneBuffer), typeof(LoadSubScene),
                 typeof(SubSceneLoaded));
+
+#if UNITY_EDITOR
+            this.EntityManager.SetName(entity, $"Scene: {SubSceneLoadFlagsUtil.FormatString(this.World.Flags)}");
+#endif
 
             this.EntityManager.SetComponentData(entity, new SubSceneLoadData
             {

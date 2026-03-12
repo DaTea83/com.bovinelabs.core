@@ -11,7 +11,11 @@ namespace BovineLabs.Core.Editor.Inspectors
     using UnityEditor;
     using UnityEngine;
     using UnityEngine.UIElements;
+#if UNITY_6000_5_OR_NEWER
+    using MaskField = UnityEngine.UIElements.MaskField;
+#else
     using MaskField = UnityEditor.UIElements.MaskField;
+#endif
 
     public abstract class BitFieldAttributeEditor<T> : PropertyDrawer
         where T : PropertyAttribute, IBitFieldAttribute
@@ -79,7 +83,7 @@ namespace BovineLabs.Core.Editor.Inspectors
             }
         }
 
-        protected abstract IEnumerable<(string Name, int Value)>? GetKeyValues(T attr);
+        protected abstract IEnumerable<(string Name, int Value)> GetKeyValues(T attr);
 
         private static ulong Remap(int c, Dictionary<int, int> remap)
         {

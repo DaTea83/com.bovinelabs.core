@@ -1,4 +1,4 @@
-// <copyright file="ComponentAssetEditor.cs" company="BovineLabs">
+// <copyright file="ComponentAssetBaseEditor.cs" company="BovineLabs">
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
@@ -13,10 +13,10 @@ namespace BovineLabs.Core.Editor.Component
     [CustomEditor(typeof(ComponentAssetBase), isFallback = true)]
     public class ComponentAssetBaseEditor : ElementEditor
     {
-        private SerializedProperty? componentNameProperty;
+        private SerializedProperty componentNameProperty;
 
         /// <inheritdoc/>
-        protected override VisualElement? CreateElement(SerializedProperty property)
+        protected override VisualElement CreateElement(SerializedProperty property)
         {
             switch (property.name)
             {

@@ -98,7 +98,7 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
 
         private void Create()
         {
-            var activeFolderPath = ProjectView.Internal.GetDirectory();
+            var activeFolderPath = ProjectView.Internal.GetDirectory().TrimEnd('/', '\\');;
 
             var assemblyToggles = this.rootVisualElement.Query<Toggle>(className: "assembly").Where(t => t.value).ToList();
 
@@ -119,6 +119,7 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
             var internalAccess = this.GetToggleValue("internalAccess");
             var disableAutoCreation = this.GetToggleValue("disableAutoCreation");
             var allowUnsafeCode = this.GetToggleValue("allowUnsafeCode");
+            var addAnchor = this.GetToggleValue("addAnchor");
 
             foreach (var toggle in assemblyToggles)
             {
@@ -196,7 +197,11 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
                     switch (label)
                     {
                         case "Main":
-                            AddAnchor(references);
+                            if (addAnchor)
+                            {
+                                AddAnchor(references);
+                            }
+
                             break;
 
                         case "Server":
@@ -204,7 +209,11 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
                             break;
 
                         case "Debug":
-                            AddAnchor(references);
+                            if (addAnchor)
+                            {
+                                AddAnchor(references);
+                            }
+
                             definition.defineConstraints.Add("UNITY_EDITOR || BL_DEBUG");
                             break;
 

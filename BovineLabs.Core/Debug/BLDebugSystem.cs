@@ -18,6 +18,7 @@ namespace BovineLabs.Core
 
     [Configurable]
     [WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.ThinClientSimulation | WorldSystemFilterFlags.Editor)]
+    [UpdateInGroup(typeof(InitializationSystemGroup), OrderFirst = true)]
     public partial class BLDebugSystem : InitSystemBase
     {
         private const int DefaultMinLength = 0;
@@ -27,8 +28,7 @@ namespace BovineLabs.Core
 
         internal static void Create(World world)
         {
-            var netDebugEntity = world.EntityManager.CreateSingleton<BLLogger>();
-            world.EntityManager.SetName(netDebugEntity, "DBDebug");
+            var entity = world.EntityManager.CreateEntity<BLLogger>("BL Logger");
 
             var worldName = world.Name.TrimEnd("World").TrimEnd();
 
@@ -39,7 +39,7 @@ namespace BovineLabs.Core
             worldName = worldName.Length > maxLength ? worldName[..maxLength] : worldName;
             worldName = worldName.PadRight(minLength);
 
-            world.EntityManager.SetComponentData(netDebugEntity, new BLLogger { World = worldName });
+            world.EntityManager.SetComponentData(entity, new BLLogger { World = worldName });
         }
 
         /// <inheritdoc />

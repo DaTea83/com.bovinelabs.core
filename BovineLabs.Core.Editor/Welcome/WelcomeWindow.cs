@@ -24,6 +24,7 @@ namespace BovineLabs.Core.Editor.Welcome
         private const string ExtensionsEnableKey = "BL_CORE_EXTENSIONS";
         private const string PhysicsStatesDefine = "BL_DISABLE_PHYSICS_STATES";
         private const string PhysicsUpdateDefine = "BL_DISABLE_PHYSICS_ALWAYS_UPDATE";
+        private const string RelevancyDefine = "BL_DISABLE_RELEVANCY";
         private const string ToolsMenuDefine = "BL_TOOLS_MENU";
         private const string ExtensionsDisabledClass = "bl-button--danger";
         private const string DiscordUrl = "https://discord.gg/2Y6eQ76AUV";
@@ -42,7 +43,7 @@ namespace BovineLabs.Core.Editor.Welcome
         private Button enableExtensionsButton = null!;
         private FeatureToggle menuLocationToggle = null!;
         private FeatureToggle inspectorSearchToggle = null!;
-        private ListRequest? packageListRequest;
+        private ListRequest packageListRequest;
         private bool extensionsSupported;
         private bool extensionsEnabled;
         private bool packageListUpdateRegistered;
@@ -362,7 +363,7 @@ namespace BovineLabs.Core.Editor.Welcome
             }
             else if (this.packageListRequest.Status >= StatusCode.Failure)
             {
-                Debug.LogError($"Failed to list packages: {this.packageListRequest.Error.message}");
+                BLGlobalLogger.LogError($"Failed to list packages: {this.packageListRequest.Error.message}");
 
                 foreach (var package in this.packages)
                 {
@@ -433,7 +434,7 @@ namespace BovineLabs.Core.Editor.Welcome
             {
                 if (!this.packageLookup.TryGetValue(dependencyName, out var dependency))
                 {
-                    Debug.LogWarning($"Unable to find dependency \"{dependencyName}\" for {package.PackageName}.");
+                    BLGlobalLogger.LogWarningString($"Unable to find dependency \"{dependencyName}\" for {package.PackageName}.");
                     continue;
                 }
 
@@ -493,7 +494,7 @@ namespace BovineLabs.Core.Editor.Welcome
                 {
                     package.Installed = false;
                     package.HadError = true;
-                    Debug.LogError($"Failed to install {package.PackageName}: {request.Error.message}");
+                    BLGlobalLogger.LogError($"Failed to install {package.PackageName}: {request.Error.message}");
                 }
 
                 package.InstallRequest = null;
@@ -783,7 +784,15 @@ namespace BovineLabs.Core.Editor.Welcome
             if (define is PhysicsStatesDefine or PhysicsUpdateDefine)
             {
 #if !UNITY_PHYSICS
-                tooltip = "Requires Unity Physics to enable Physics States.";
+                tooltip = "Requires Unity Physics to enable this feature.";
+                return false;
+#endif
+            }
+
+            if (define == RelevancyDefine)
+            {
+#if !UNITY_NETCODE
+                tooltip = "Requires Unity NetCode to enable Relevancy.";
                 return false;
 #endif
             }
@@ -834,7 +843,7 @@ namespace BovineLabs.Core.Editor.Welcome
 
             public bool Installed { get; set; }
 
-            public AddAndRemoveRequest? InstallRequest { get; set; }
+            public AddAndRemoveRequest InstallRequest { get; set; }
 
             public bool HadError { get; set; }
         }

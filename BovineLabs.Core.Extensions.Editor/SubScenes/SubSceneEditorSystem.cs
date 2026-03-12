@@ -9,6 +9,7 @@ namespace BovineLabs.Core.Editor.SubScenes
     using BovineLabs.Core.ConfigVars;
     using BovineLabs.Core.Editor.Settings;
     using BovineLabs.Core.EntityCommands;
+    using BovineLabs.Core.Extensions;
     using BovineLabs.Core.Groups;
     using BovineLabs.Core.SubScenes;
     using Unity.Burst;
@@ -24,7 +25,7 @@ namespace BovineLabs.Core.Editor.SubScenes
         [ConfigVar("debug.subscene-override", -1, "", true, true)]
         public static readonly SharedStatic<int> Override = SharedStatic<int>.GetOrCreate<SubSceneEditorSystem>();
 
-        private SubSceneEditorSet? set;
+        private SubSceneEditorSet set;
 
         /// <inheritdoc/>
         protected override void OnCreate()
@@ -42,7 +43,7 @@ namespace BovineLabs.Core.Editor.SubScenes
 
             this.set = sets[index];
 
-            this.EntityManager.CreateSingleton<RequireForLoading>();
+            this.EntityManager.CreateEntity<RequireForLoading>("RequireForLoading");
         }
 
         /// <inheritdoc/>
@@ -69,13 +70,14 @@ namespace BovineLabs.Core.Editor.SubScenes
 
             var commands = new EntityManagerCommands(this.EntityManager);
             commands.CreateEntity();
-            SubSceneAuthUtil.AddComponents(ref commands, new SubSceneSetId(-2), this.set!.TargetWorld, true, true, true, this.set.Scenes);
+            commands.SetName($"Scene: {SubSceneLoadFlagsUtil.FormatString(this.set.TargetWorld)}");
+            SubSceneAuthUtil.AddComponents(ref commands, new SubSceneSetId(-2), this.set.TargetWorld, true, true, true, this.set.Scenes);
 
             this.Enabled = false;
             this.EntityManager.DestroyEntity(SystemAPI.GetSingletonEntity<RequireForLoading>());
         }
 
-        // Component to force this system never to run again in case it's accidently re-enabled
+        // Component to force this system never to run again in case it's accidentally re-enabled
         private struct RequireForLoading : IComponentData
         {
         }
